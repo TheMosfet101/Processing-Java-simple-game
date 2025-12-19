@@ -1,0 +1,71 @@
+ArrayList<Integer> missileX = new ArrayList<Integer>(); // I use an ArrayList for the X/Y positions of the missile, it's direction, and it's speed as all of these won't have a defined limit and is constantly being added/removed as well.
+ArrayList<Integer> missileY = new ArrayList<Integer>();
+ArrayList<Integer> direction = new ArrayList<Integer>();
+ArrayList<Integer> SpeedX = new ArrayList<Integer>();
+ArrayList<Integer> SpeedY = new ArrayList<Integer>();
+int [] Vix = new int[5]; // I use a fixed-size array as I only have five orbs with X/Y positions and speeds for both of them, as i don't add nor subtract from these values at all.
+int [] Viy = new int[5];
+int [] circleX = new int[5];
+int[] circleY = new int [5];
+void setup(){
+  size(640,480);
+  for(int i = 0; i < 5; i ++){
+    circleX[i] = 120 * i + 60; // each orb's X value is set apart of each other by a factor of 60, with the use of a For-loop.
+    circleY[i] = floor(random(45,220)); // each orb's Y value is randomly set between 45 and 220 to ensure that they are far away from each other.
+    Vix[i] =  floor(2 * pow(-1,floor(random(1,5)))); // the initial speed of the orb's X and Y values are constantly shifting from being 2 or - 2 to ensure that each orbs goes in a randomized direction. This is done with multiplying 2 by -1 to the power of either a even or odd number, determining if we get a positive or a negative 1. 
+    Viy[i] =  floor(2 * pow(-1,floor(random(1,5))));
+  }
+}
+void draw(){
+  background(0);
+  for(int i = 0; i < 5; i++){
+    fill(255);
+    circle(circleX[i],circleY[i],50);
+    circleX[i] += Vix[i];
+    circleY[i] += Viy[i];
+    if(circleX[i] <= 0){ // if the X value of the orb is less than zero, it'll reverse the value by postive 2 to simulate a bouncing effect.
+      Vix[i] = 2;
+    } else if(circleX[i] >= width){ // if the X value of the orb is greater than the width , it'll reverse the value by positive 2 instead.
+     Vix[i] = -2;
+    }
+    if(circleY[i] <= 0){
+      Viy[i] = 2;
+    } else if(circleY[i] >= height){
+      Viy[i] = -2;
+    }
+     for(int h = 0; h < missileX.size(); h ++){ 
+      fill(0,0,255);
+      stroke(0);
+      circle(missileX.get(h),missileY.get(h),20);
+      stroke(255);
+      strokeWeight(0.8);
+      line(missileX.get(h),missileY.get(h),circleX[direction.get(h)],circleY[direction.get(h)]); // I create a white line with a stroke weight of 0.8, between the X/Y position of the missile to it's destined target of the orbs.
+      missileX.set(h,missileX.get(h) + SpeedX.get(h)); // I add onto the X and Y values of the missile to simulate movement with speed.
+      missileY.set(h,missileY.get(h) + SpeedY.get(h));
+      if(missileX.get(h) < circleX[direction.get(h)]){ // if the X value of the missile is less than the orbs X position from the index of "h", it'll set the speed by positive 1 to simulate a homing affect.
+        SpeedX.set(h,1);
+      } else if(missileX.get(h) > circleX[direction.get(h)]){ // if the X value of the missile is greater than the orbs X position from the index of "h", it'll set the speed by negative 1 instead.
+        SpeedX.set(h,-1);
+      }
+      if(missileY.get(h) < circleY[direction.get(h)]){
+        SpeedY.set(h,1);
+      } else if(missileY.get(h) > circleY[direction.get(h)]){
+        SpeedY.set(h,-1);
+      }
+      if(dist(missileX.get(h),missileY.get(h),circleX[direction.get(h)],circleY[direction.get(h)]) <= 20){ // If the missile's X/Y position is in contact with the orb by a threshold of under 20, it'll remove the X/Y value of the missile, it's speed for both values, and the index of its direction to an orb.
+        missileX.remove(h);
+        missileY.remove(h);
+        direction.remove(h);
+        SpeedX.remove(h);
+        SpeedY.remove(h);
+      }
+    }
+}
+}
+void mousePressed(){
+  missileX.add(mouseX); // I add onto the ArrayList of the missile's X/Y position and to both respective speeds when the mouse is pressed.
+  missileY.add(mouseY);
+   SpeedX.add(1);
+   SpeedY.add(1);
+  direction.add(floor(random(5))); // It sets the randomized direction towards one of the orbs, for the missile to follow.
+}
